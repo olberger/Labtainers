@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     
 # 
 ARG DOCKER_GROUP_ID
-RUN groupadd -g $DOCKER_GROUP_ID docker
+#RUN groupadd -g $DOCKER_GROUP_ID docker
 
 # 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
@@ -58,8 +58,34 @@ RUN  apt-get install -y --no-install-recommends \
 RUN  apt-get install -y --no-install-recommends \
      dbus-x11
 
+# For debugging purposes
+RUN  apt-get install -y --no-install-recommends \
+     vim
+
+# For update-designer.sh
+RUN  apt-get install -y --no-install-recommends \
+     wget
+
+RUN  apt-get install -y --no-install-recommends \
+     sudo
+
 RUN useradd -ms /bin/bash labtainer
 RUN usermod -aG docker labtainer
+RUN echo "labtainer:labtainer" | chpasswd
+
+RUN adduser labtainer sudo
+
+COPY ./docker-entrypoint /
+
+RUN echo "\
+===================================================================\n\
+= Labtainers master Docker container                              =\n\
+===================================================================\n\
+\n\
+To start labs : \n\
+ - cd ~/labtainer/labtainer-student\n\
+ - labtainer [labname]\n"\
+    > /etc/motd
 
 USER labtainer
 WORKDIR /home/labtainer
@@ -76,3 +102,7 @@ RUN cat bashrc.labtainer.master >>/home/labtainer/.bashrc
 COPY --chown=labtainer:labtainer labutils.py /home/labtainer/labtainer/labtainer-student/bin/
 
 ENV DISPLAY :0
+
+USER root
+ENTRYPOINT [ "/docker-entrypoint" ]
+

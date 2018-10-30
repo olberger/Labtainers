@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -x
+
+DOCKER_SOCK=/var/run/docker.sock
+
+DOCKER_GID=$(stat -c '%g' ${DOCKER_SOCK})
+# if [ "${DOCKER_GID}" != "0" ]; then
+#     addgroup --gid ${DOCKER_GID} docker
+#     adduser docker docker
+# else
+sed -i -e "s/^docker:\([^:]*\):[0-9]*/docker:\1:${DOCKER_GID}/" /etc/group
+#fi
+
+echo "$@"
+#su - labtainer -c "/bin/bash"
+#su - labtainer -c "$@"
+#sudo -u labtainer "$@"
+#exec "$@"
+sudo -u labtainer -i
+
