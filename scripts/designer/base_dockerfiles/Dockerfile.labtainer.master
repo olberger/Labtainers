@@ -1,5 +1,22 @@
-FROM ubuntu:xenial
+#FROM ubuntu:xenial
+FROM debian:stable
 LABEL description="This is Docker image for the Labtainers master controller"
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update
+RUN apt-get install -y locales -qq && \
+    locale-gen en_US.UTF-8 en_us && \
+    dpkg-reconfigure locales && \
+    dpkg-reconfigure locales && \
+    locale-gen C.UTF-8 && \
+    /usr/sbin/update-locale LANG=C.UTF-8
+ENV LANG C.UTF-8
+ENV LANGUAGE C.UTF-8
+ENV LC_ALL C.UTF-8
+
+
+
 #ARG lab
 #RUN mv /etc/apt/sources.list /tmp/
 #ADD system/etc/nps.sources.list /etc/apt/sources.list
@@ -8,6 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https \
     ca-certificates \
     curl \
+    gnupg2 \
     software-properties-common
     
 # 
@@ -15,18 +33,22 @@ ARG DOCKER_GROUP_ID
 #RUN groupadd -g $DOCKER_GROUP_ID docker
 
 # 
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+# RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
+#     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+#     apt-get update && \
+#     apt-get install -y --no-install-recommends docker-ce
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
     apt-get update && \
     apt-get install -y --no-install-recommends docker-ce
 
 # Set the locale
-RUN  apt-get install -y --no-install-recommends \
-    locales
-RUN locale-gen en_US.UTF-8  
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8  
+# RUN  apt-get install -y --no-install-recommends \
+#     locales
+# RUN locale-gen en_US.UTF-8  
+# ENV LANG en_US.UTF-8  
+# ENV LANGUAGE en_US:en  
+# ENV LC_ALL en_US.UTF-8  
 # RUN sudo pip install --upgrade pip
 # RUN sudo pip install setuptools
 # RUN sudo pip install parse
@@ -68,6 +90,9 @@ RUN  apt-get install -y --no-install-recommends \
 
 RUN  apt-get install -y --no-install-recommends \
      sudo
+
+RUN apt-get install -y --no-install-recommends \
+    tigervnc-standalone-server xfwm4 xfce4-panel
 
 RUN useradd -ms /bin/bash labtainer
 RUN usermod -aG docker labtainer
